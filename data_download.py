@@ -128,8 +128,10 @@ class DataDownload():
 
         dates = [rec['period']['datetimeFrom']['local'] for rec in all_results]
         vals = [rec['value'] for rec in all_results]
+
         data_dict = {'Date': dates,
-                    pollutant: vals}
+                    pollutant: vals,
+                    }
         
         data_df = pd.DataFrame(data_dict)
         
@@ -149,14 +151,19 @@ class DataDownload():
                 if s['parameter']['name']=='pm25':
                     pm25_sensor_id = s['id']
                     pm25_sensor_loc = results_df.iloc[i]['name']
+                    lat = results_df.iloc[i]['coordinates.latitude']
+                    lon = results_df.iloc[i]['coordinates.longitude']
                     # print(pm25_sensor_id)
                     # print(pm25_sensor_loc)
                     data = dd.download_daily(id= pm25_sensor_id,
                                             pollutant= 'PM2.5',
-                                            start_date='2026-01-01')
+                                            start_date='2026-01-01'
+                                            )
                     
                     data['name'] = pm25_sensor_loc
                     data['sensor_id'] = pm25_sensor_id
+                    data['latitude'] = lat
+                    data['longitude'] = lon
                     
                     # print(data.shape)
 
@@ -164,3 +171,4 @@ class DataDownload():
 
         gta_sensors_df = pd.concat(df_list, ignore_index=True)
         print(gta_sensors_df.shape)
+        print(gta_sensors_df.columns)
