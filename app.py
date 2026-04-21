@@ -7,6 +7,9 @@ Run:
 
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+TORONTO_TZ = ZoneInfo("America/Toronto")
 
 import dash
 from dash import dcc, html, Input, Output, callback
@@ -96,7 +99,7 @@ app.layout = dbc.Container(
     children=[
 
         # ── Auto-refresh interval (every 60 min) ─────────────────────────
-        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),  # refresh every hour
+        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),
 
         dbc.Row(
             style={"margin": 0, "minHeight": "100vh"},
@@ -213,6 +216,41 @@ app.layout = dbc.Container(
                                 ]
                             ],
                         ]),
+
+                        html.Hr(style={"borderColor": "#1e2a38", "margin": "0.5rem 0"}),
+
+                        # Data source
+                        html.Div([
+                            html.P(
+                                "DATA SOURCE",
+                                style={
+                                    "fontFamily": "'Space Mono', monospace",
+                                    "fontSize": "0.58rem",
+                                    "letterSpacing": "0.18em",
+                                    "color": "#4a6a7a",
+                                    "marginBottom": "4px",
+                                }
+                            ),
+                            html.A(
+                                "OpenAQ",
+                                href="https://openaq.org",
+                                target="_blank",
+                                style={
+                                    "fontFamily": "'DM Sans', sans-serif",
+                                    "fontSize": "0.8rem",
+                                    "color": "#4a90a4",
+                                    "textDecoration": "none",
+                                }
+                            ),
+                            html.Span(
+                                " — open-source air quality data from government monitoring stations.",
+                                style={
+                                    "fontFamily": "'DM Sans', sans-serif",
+                                    "fontSize": "0.75rem",
+                                    "color": "#5a7a8a",
+                                }
+                            ),
+                        ]),
                     ]
                 ),
 
@@ -297,7 +335,7 @@ def update_dashboard(n_intervals, view):
         ])
 
     # ── Timestamp ─────────────────────────────────────────────────────────
-    ts = f"UPDATED {datetime.now():%Y-%m-%d %H:%M}"
+    ts = f"UPDATED {datetime.now(TORONTO_TZ):%Y-%m-%d %H:%M} ET"
 
     return fig, cards, ts
 
