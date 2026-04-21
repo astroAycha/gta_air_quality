@@ -9,8 +9,8 @@ import plotly.graph_objects as go
 TORONTO_LAT = 43.70
 TORONTO_LON = -79.385
 
-MAPBOX_STYLE = "carto-positron"
-DEFAULT_ZOOM = 9
+MAPBOX_STYLE = "carto-darkmatter"
+DEFAULT_ZOOM = 10
 
 # Fixed AQI bounds matching EPA breakpoints
 AQI_MIN = 0.0
