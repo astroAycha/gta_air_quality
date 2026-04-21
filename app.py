@@ -301,4 +301,4 @@ def update_dashboard(n_intervals, view):
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     os.makedirs("logs", exist_ok=True)
-    app.run(debug=False, host="0.0.0.0", port=8050)
+    app.run(debug=False, host="0.0.0.0", port=7860)
