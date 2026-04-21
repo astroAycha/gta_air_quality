@@ -25,32 +25,39 @@ BACKFILL_DAYS  = 30   # how far back to go on first run
 INCREMENTAL_DAYS = 2  # how far back to go on subsequent runs
 
 
-def s3_has_data() -> bool:
-    """Return True if the S3 bucket already contains at least one parquet file."""
-    import boto3
-    s3 = boto3.client(
-        "s3",
-        region_name=os.getenv("AWS_REGION", "us-east-1"),
-        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-    )
-    bucket = os.environ["S3_BUCKET"]
-    prefix = os.getenv("S3_PREFIX", "readings")
-    resp = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, MaxKeys=1)
-    return resp.get("KeyCount", 0) > 0
+def oldest_date_in_s3() -> str | None:
+    """
+    Return the oldest date in S3 as a string (yyyy-mm-dd),
+    or None if no data exists yet.
+    """
+    from storage import _duckdb_conn, _parquet_glob
+    try:
+        con = _duckdb_conn()
+        result = con.execute(f"""
+            SELECT MIN(date) AS oldest
+            FROM read_parquet('{_parquet_glob(days=90)}', hive_partitioning = true)
+        """).fetchone()
+        con.close()
+        return result[0] if result and result[0] else None
+    except Exception:
+        # No files found or any other error — treat as empty
+        return None
 
 
 def main():
     from data_download import DataDownload
     from storage import upsert_readings
 
-    # Decide how far back to fetch
-    if s3_has_data():
-        days_back = INCREMENTAL_DAYS
-        logging.info("Existing data found — incremental fetch (last 2 days)")
-    else:
+    # Decide how far back to fetch based on oldest date already in S3
+    oldest = oldest_date_in_s3()
+    cutoff = (datetime.now() - timedelta(days=BACKFILL_DAYS)).strftime("%Y-%m-%d")
+
+    if oldest is None or oldest > cutoff:
         days_back = BACKFILL_DAYS
-        logging.info("No existing data — backfilling last 30 days")
+        logging.info(f"Oldest data in S3: {oldest or 'none'} — backfilling last {BACKFILL_DAYS} days")
+    else:
+        days_back = INCREMENTAL_DAYS
+        logging.info(f"Oldest data in S3: {oldest} — incremental fetch (last {INCREMENTAL_DAYS} days)")
 
     start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
