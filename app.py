@@ -96,7 +96,7 @@ app.layout = dbc.Container(
     children=[
 
         # ── Auto-refresh interval (every 60 min) ─────────────────────────
-        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0)  # refresh every hour,
+        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),  # refresh every hour
 
         dbc.Row(
             style={"margin": 0, "minHeight": "100vh"},
