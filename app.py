@@ -224,7 +224,7 @@ app.layout = dbc.Container(
                         dcc.Graph(
                             id="air-quality-map",
                             style={"height": "100vh"},
-                            config={"displayModeBar": False},
+                            config={"displayModeBar": True, "scrollZoom": True}, 
                         ),
                     ]
                 ),
