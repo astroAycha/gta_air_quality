@@ -5,10 +5,10 @@ This project focuses on analyzing and visualizing PM2.5 air pollution data in th
 ## Features
 
 - **Automated Data Ingestion**: Fetches air quality data from OpenAQ.
-- **Geospatial Processing**: Processes and analyzes spatial data for the GTA.
-- **Visualization**: Creates animated maps to visualize PM2.5 pollution over time.
+- **Interactive Dashboard**: Provides real-time monitoring of air quality.
 - **Future Enhancements**:
   - Forecasting air quality trends.
-  - Interactive dashboard for real-time monitoring.
+  - Geospatial Processing: Enhancing spatial analysis capabilities.
 
-![Example air quality in the GTA](snapshot.png)
+
+![Check out the interactive dashboard on Hugging Face Spaces](https://huggingface.co/spaces/astroAycha/gta-air-quality)
