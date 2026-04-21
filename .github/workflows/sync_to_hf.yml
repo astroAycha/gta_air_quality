@@ -19,4 +19,4 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           cp README_HF.md README.md
-          git push https://astroAycha:$HF_TOKEN@huggingface.co/spaces/astroAycha/gta-air-quality main
+          git push --force https://astroAycha:$HF_TOKEN@huggingface.co/spaces/astroAycha/gta-air-quality main
