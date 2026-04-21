@@ -124,8 +124,8 @@ def load_readings(days: int = 30) -> pd.DataFrame:
     try:
         con = _duckdb_conn()
         df  = con.execute(f"""
-            SELECT  date        AS "Date",
-                    pm25        AS "PM2.5",
+            SELECT  date          AS "Date",
+                    "PM2.5",
                     name,
                     sensor_id,
                     latitude,
@@ -153,8 +153,8 @@ def load_latest_readings() -> pd.DataFrame:
         con = _duckdb_conn()
         df  = con.execute(f"""
             WITH ranked AS (
-                SELECT  date        AS "Date",
-                        pm25        AS "PM2.5",
+                SELECT  date          AS "Date",
+                        "PM2.5",
                         name,
                         sensor_id,
                         latitude,
