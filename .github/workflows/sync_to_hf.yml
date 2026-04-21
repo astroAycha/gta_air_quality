@@ -26,6 +26,7 @@ jobs:
           mv README_HF.md README.md
 
           git init
+          git branch -m main
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
