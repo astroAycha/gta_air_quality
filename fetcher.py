@@ -38,7 +38,7 @@ def oldest_date_in_s3() -> str | None:
             FROM read_parquet('{_parquet_glob(days=90)}', hive_partitioning = true)
         """).fetchone()
         con.close()
-        return result[0] if result and result[0] else None
+        return str(result[0]) if result and result[0] else None
     except Exception:
         # No files found or any other error — treat as empty
         return None
