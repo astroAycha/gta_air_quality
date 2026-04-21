@@ -18,9 +18,11 @@ from datetime import datetime, timedelta
 import boto3
 import duckdb
 import pandas as pd
-from dotenv import load_dotenv
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # ── Config ────────────────────────────────────────────────────────────────────
 S3_BUCKET        = os.environ["S3_BUCKET"]
@@ -64,7 +66,12 @@ def upsert_readings(df: pd.DataFrame):
 
     s3 = _s3_client()
 
-    for date_str, day_df in df.groupby("Date"):
+    # Partition by date only (Date column is now a full timestamp e.g. "2026-04-21 14:00")
+    df = df.copy()
+    df["_partition_date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
+
+    for date_str, day_df in df.groupby("_partition_date"):
+        day_df = day_df.drop(columns=["_partition_date"])
         key = _s3_key(date_str)
 
         # Try to fetch existing partition
@@ -73,7 +80,7 @@ def upsert_readings(df: pd.DataFrame):
             existing = pd.read_parquet(io.BytesIO(obj["Body"].read()))
             merged = (
                 pd.concat([existing, day_df], ignore_index=True)
-                .drop_duplicates(subset=["Date", "sensor_id"], keep="last")
+                .drop_duplicates(subset=["Date", "sensor_id"], keep="last")  # Date is full timestamp
             )
         except s3.exceptions.NoSuchKey:
             merged = day_df.copy()

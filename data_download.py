@@ -3,7 +3,6 @@ from requests.exceptions import ConnectionError, HTTPError
 import os
 import logging
 import pandas as pd
-
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -87,7 +86,7 @@ class DataDownload():
         -------
         pd.DataFrame  with columns [Date, <pollutant>]
         """
-        data_url = f"https://api.openaq.org/v3/sensors/{id}/measurements/daily"
+        data_url = f"https://api.openaq.org/v3/sensors/{id}/measurements/hourly"
         all_results = []
         page = 1
         limit = 1000
@@ -184,7 +183,7 @@ class DataDownload():
             return pd.DataFrame()
 
         result = pd.concat(df_list, ignore_index=True)
-        result['Date'] = pd.to_datetime(result['Date']).dt.date.astype(str)
+        result['Date'] = pd.to_datetime(result['Date']).dt.strftime('%Y-%m-%d %H:%M')
         logging.info(f"fetch_pm25_sensors: {result.shape[0]} total rows")
         return result
 

@@ -96,7 +96,7 @@ app.layout = dbc.Container(
     children=[
 
         # ── Auto-refresh interval (every 60 min) ─────────────────────────
-        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),
+        dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0)  # refresh every hour,
 
         dbc.Row(
             style={"margin": 0, "minHeight": "100vh"},
@@ -150,7 +150,7 @@ app.layout = dbc.Container(
                             dbc.RadioItems(
                                 id="view-toggle",
                                 options=[
-                                    {"label": "Latest snapshot", "value": "latest"},
+                                    {"label": "Latest reading", "value": "latest"},
                                     {"label": "30-day history",  "value": "history"},
                                 ],
                                 value="latest",
@@ -224,7 +224,7 @@ app.layout = dbc.Container(
                         dcc.Graph(
                             id="air-quality-map",
                             style={"height": "100vh"},
-                            config={"displayModeBar": True, "scrollZoom": True}, 
+                            config={"displayModeBar": True, "scrollZoom": True},
                         ),
                     ]
                 ),
