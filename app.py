@@ -16,11 +16,15 @@ from storage import load_latest_readings, load_readings
 from map_builder import build_latest_map, build_historical_map
 
 # ── Logging ──────────────────────────────────────────────────────────────────
+import os as _os
+_os.makedirs('logs', exist_ok=True)
 logging.basicConfig(
-    filename='logs/app.log',
     level=logging.INFO,
-    filemode='a',
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('logs/app.log', mode='a'),
+    ]
 )
 
 # ── Bootstrap + custom theme ─────────────────────────────────────────────────
