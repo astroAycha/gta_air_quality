@@ -18,5 +18,16 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          cp README_HF.md README.md
+          # Build a clean directory with only the files HF Spaces needs
+          mkdir /tmp/hf_deploy
+          cp app.py storage.py map_builder.py data_download.py fetcher.py requirements.txt README_HF.md /tmp/hf_deploy/
+
+          cd /tmp/hf_deploy
+          mv README_HF.md README.md
+
+          git init
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "deploy from GitHub Actions"
           git push --force https://astroAycha:$HF_TOKEN@huggingface.co/spaces/astroAycha/gta-air-quality main
