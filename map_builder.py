@@ -9,14 +9,21 @@ import plotly.graph_objects as go
 TORONTO_LAT = 43.70
 TORONTO_LON = -79.385
 
-COLOR_SCALE = "tealrose"
+COLOR_SCALE  = "tealrose"
 MAPBOX_STYLE = "carto-positron"
 DEFAULT_ZOOM = 9
 
+# Fixed AQI colour scale bounds — colours always match the sidebar legend
+AQI_MIN = 0.0
+AQI_MAX = 250.4
 
-def _common_layout(fig: go.Figure,
-                   pm25_min: float,
-                   pm25_max: float) -> go.Figure:
+
+def _size_col(series: pd.Series) -> pd.Series:
+    """Scale PM2.5 values to marker sizes, ensuring a visible minimum."""
+    return (series - AQI_MIN + 1).clip(lower=1)
+
+
+def _common_layout(fig: go.Figure) -> go.Figure:
     fig.update_layout(
         margin=dict(l=0, r=0, t=36, b=0),
         coloraxis_colorbar=dict(
@@ -28,9 +35,10 @@ def _common_layout(fig: go.Figure,
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(family="'DM Sans', sans-serif", color="#e8e0d4"),
     )
+    # Always pin to fixed AQI range so colours match the legend
     fig.update_coloraxes(
-        cmin=pm25_min,
-        cmax=pm25_max,
+        cmin=AQI_MIN,
+        cmax=AQI_MAX,
         colorscale=COLOR_SCALE,
     )
     return fig
@@ -39,27 +47,18 @@ def _common_layout(fig: go.Figure,
 def build_latest_map(df: pd.DataFrame) -> go.Figure:
     """
     Single-frame map showing the most-recent reading per sensor.
-
-    Parameters
-    ----------
-    df : DataFrame with columns [Date, PM2.5, name, latitude, longitude]
     """
     if df.empty:
         return _empty_figure("No data available yet — first fetch in progress.")
-
-    pm25_min = df["PM2.5"].min()
-    pm25_max = df["PM2.5"].max()
-
-    # Ensure non-zero size range so tiny values still show a dot
-    size_col = (df["PM2.5"] - pm25_min + 1).clip(lower=1)
 
     fig = px.scatter_mapbox(
         df,
         lat="latitude",
         lon="longitude",
         color="PM2.5",
-        size=size_col,
+        size=_size_col(df["PM2.5"]),
         color_continuous_scale=COLOR_SCALE,
+        range_color=[AQI_MIN, AQI_MAX],
         center={"lat": TORONTO_LAT, "lon": TORONTO_LON},
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
@@ -69,16 +68,12 @@ def build_latest_map(df: pd.DataFrame) -> go.Figure:
         title="Latest PM2.5 Readings",
     )
 
-    return _common_layout(fig, pm25_min, pm25_max)
+    return _common_layout(fig)
 
 
 def build_historical_map(df: pd.DataFrame) -> go.Figure:
     """
     Animated map with one frame per date.
-
-    Parameters
-    ----------
-    df : DataFrame with columns [Date, PM2.5, name, latitude, longitude]
     """
     if df.empty:
         return _empty_figure("No historical data available yet.")
@@ -89,12 +84,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         ["PM2.5"].mean()
     )
     agg = agg.sort_values("Date")
-
-    pm25_min = agg["PM2.5"].min()
-    pm25_max = agg["PM2.5"].max()
-    size_col = (agg["PM2.5"] - pm25_min + 1).clip(lower=1)
-    agg = agg.copy()
-    agg["_size"] = size_col
+    agg["_size"] = _size_col(agg["PM2.5"])
 
     fig = px.scatter_mapbox(
         agg,
@@ -104,6 +94,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         size="_size",
         animation_frame="Date",
         color_continuous_scale=COLOR_SCALE,
+        range_color=[AQI_MIN, AQI_MAX],
         center={"lat": TORONTO_LAT, "lon": TORONTO_LON},
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
@@ -118,7 +109,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 800
         fig.layout.updatemenus[0].buttons[0].args[1]["transition"]["duration"] = 200
 
-    return _common_layout(fig, pm25_min, pm25_max)
+    return _common_layout(fig)
 
 
 def _empty_figure(message: str) -> go.Figure:
