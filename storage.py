@@ -24,6 +24,8 @@ try:
 except ImportError:
     pass
 
+load_dotenv()
+
 # ── Config ────────────────────────────────────────────────────────────────────
 S3_BUCKET        = os.environ["S3_BUCKET"]
 S3_PREFIX        = os.getenv("S3_PREFIX", "readings")
@@ -78,15 +80,20 @@ def upsert_readings(df: pd.DataFrame):
         try:
             obj = s3.get_object(Bucket=S3_BUCKET, Key=key)
             existing = pd.read_parquet(io.BytesIO(obj["Body"].read()))
+            # Force Date back to string to prevent pandas coercing to datetime
+            existing["Date"] = existing["Date"].astype(str)
             merged = (
                 pd.concat([existing, day_df], ignore_index=True)
-                .drop_duplicates(subset=["Date", "sensor_id"], keep="last")  # Date is full timestamp
+                .drop_duplicates(subset=["Date", "sensor_id"], keep="last")
             )
         except s3.exceptions.NoSuchKey:
             merged = day_df.copy()
         except Exception as exc:
             logging.warning(f"Could not fetch existing partition {key}: {exc}")
             merged = day_df.copy()
+
+        # Ensure Date is stored as string in parquet — prevents timestamp coercion
+        merged["Date"] = merged["Date"].astype(str)
 
         # Upload
         buf = io.BytesIO()
