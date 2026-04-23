@@ -33,7 +33,7 @@ class DataDownload():
     def find_sensors(self,
                      lat: float,
                      lon: float,
-                     radius: float) -> pd.DataFrame:
+                     radius: int) -> pd.DataFrame:
         """
         Find sensors within a radius of a given point.
 
@@ -43,7 +43,7 @@ class DataDownload():
             Latitude of the centre point.
         lon : float
             Longitude of the centre point.
-        radius : float
+        radius : int
             Search radius in metres.
 
         Returns
@@ -54,7 +54,7 @@ class DataDownload():
 
         params = {
             "coordinates": f"{lat},{lon}",
-            "radius": int(radius),          # fixed: was {radius} (a set literal)
+            "radius": int(radius),  
             "limit": 1000
         }
 
@@ -141,7 +141,7 @@ class DataDownload():
     def fetch_pm25_sensors(self,
                            lat: float,
                            lon: float,
-                           radius: float,
+                           radius: int,
                            start_date: str) -> pd.DataFrame:
         """
         Convenience method: find all PM2.5 sensors near a point and
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     df = dd.fetch_pm25_sensors(
         lat=43.6532,
         lon=-79.3832,
-        radius=25000,
+        radius=50000,
         start_date='2026-01-01'
     )
     print(df.shape)
