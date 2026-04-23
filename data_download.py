@@ -54,7 +54,7 @@ class DataDownload():
 
         params = {
             "coordinates": f"{lat},{lon}",
-            "radius": radius,          # fixed: was {radius} (a set literal)
+            "radius": int(radius),          # fixed: was {radius} (a set literal)
             "limit": 1000
         }
 
