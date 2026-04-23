@@ -4,6 +4,9 @@ fetcher.py — Standalone script run by GitHub Actions on a schedule.
 On the first run (no data in S3 yet) it backfills 30 days.
 On subsequent runs it fetches the last 2 days only (yesterday + today)
 to catch any late-arriving data without re-downloading everything.
+
+Multiple search centres are used to cover the full GTA area since
+the OpenAQ API has a maximum radius of 25km.
 """
 
 import logging
@@ -11,18 +14,23 @@ import os
 import sys
 from datetime import datetime, timedelta
 
+import pandas as pd
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 
-LAT    = float(os.getenv("CENTER_LAT",    "43.6532"))
-LON    = float(os.getenv("CENTER_LON",    "-79.3832"))
-RADIUS = int(os.getenv("SEARCH_RADIUS", "50000"))
+# OpenAQ max radius is 25,000m — use multiple centres to cover the GTA
+SEARCH_CENTRES = [
+    (43.6532, -79.3832, "Toronto"),       # downtown Toronto
+    (43.5890, -79.6441, "Mississauga"),   # Mississauga centre
+]
+RADIUS = 25000   # metres — OpenAQ maximum
 
-BACKFILL_DAYS  = 30   # how far back to go on first run
-INCREMENTAL_DAYS = 2  # how far back to go on subsequent runs
+BACKFILL_DAYS    = 30
+INCREMENTAL_DAYS = 2
 
 
 def oldest_date_in_s3() -> str | None:
@@ -40,7 +48,6 @@ def oldest_date_in_s3() -> str | None:
         con.close()
         return str(result[0]) if result and result[0] else None
     except Exception:
-        # No files found or any other error — treat as empty
         return None
 
 
@@ -48,7 +55,7 @@ def main():
     from data_download import DataDownload
     from storage import upsert_readings
 
-    # Decide how far back to fetch based on oldest date already in S3
+    # Decide how far back to fetch
     oldest = oldest_date_in_s3()
     cutoff = (datetime.now() - timedelta(days=BACKFILL_DAYS)).strftime("%Y-%m-%d")
 
@@ -60,24 +67,36 @@ def main():
         logging.info(f"Oldest data in S3: {oldest} — incremental fetch (last {INCREMENTAL_DAYS} days)")
 
     start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
-
-    logging.info(f"Fetching PM2.5 sensors within {RADIUS}m of ({LAT}, {LON})")
     logging.info(f"Start date: {start_date}")
 
     dd = DataDownload()
-    df = dd.fetch_pm25_sensors(
-        lat=LAT,
-        lon=LON,
-        radius=RADIUS,
-        start_date=start_date,
-    )
+    all_dfs = []
 
-    if df.empty:
-        logging.warning("No data returned — nothing written to S3.")
+    for lat, lon, label in SEARCH_CENTRES:
+        logging.info(f"Searching {label} ({lat}, {lon}) within {RADIUS}m ...")
+        df = dd.fetch_pm25_sensors(
+            lat=lat,
+            lon=lon,
+            radius=RADIUS,
+            start_date=start_date,
+        )
+        if df.empty:
+            logging.warning(f"No data returned for {label}.")
+        else:
+            logging.info(f"{label}: {len(df)} rows, {df['sensor_id'].nunique()} sensors")
+            all_dfs.append(df)
+
+    if not all_dfs:
+        logging.warning("No data returned from any search centre.")
         sys.exit(0)
 
-    logging.info(f"Fetched {len(df)} rows across {df['sensor_id'].nunique()} sensors")
-    upsert_readings(df)
+    # Merge and deduplicate — same sensor may appear in both search areas
+    combined = pd.concat(all_dfs, ignore_index=True)
+    before = len(combined)
+    combined = combined.drop_duplicates(subset=["Date", "sensor_id"], keep="first")
+    logging.info(f"Combined: {len(combined)} rows ({before - len(combined)} duplicates removed)")
+
+    upsert_readings(combined)
     logging.info("Done.")
 
 
