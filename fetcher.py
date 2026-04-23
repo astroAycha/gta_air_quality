@@ -19,7 +19,7 @@ logging.basicConfig(
 
 LAT    = float(os.getenv("CENTER_LAT",    "43.6532"))
 LON    = float(os.getenv("CENTER_LON",    "-79.3832"))
-RADIUS = float(os.getenv("SEARCH_RADIUS", "50_000"))
+RADIUS = int(os.getenv("SEARCH_RADIUS", "50000"))
 
 BACKFILL_DAYS  = 30   # how far back to go on first run
 INCREMENTAL_DAYS = 2  # how far back to go on subsequent runs
