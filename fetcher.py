@@ -43,12 +43,13 @@ def oldest_date_in_s3() -> str | None:
     try:
         con = _duckdb_conn()
         result = con.execute(f"""
-            SELECT MIN(date) AS oldest
+            SELECT MIN(partition_date) AS oldest
             FROM read_parquet('{_parquet_glob(days=90)}', hive_partitioning = true)
         """).fetchone()
         con.close()
         return str(result[0]) if result and result[0] else None
-    except Exception:
+    except Exception as exc:
+        logging.error(f"oldest_date_in_s3 query failed: {exc}")
         return None
 
 
