@@ -45,7 +45,7 @@ def _s3_client():
 
 def _s3_key(date_str: str) -> str:
     """Return the S3 object key for a given date string (yyyy-mm-dd)."""
-    return f"{S3_PREFIX}/date={date_str}/readings.parquet"
+    return f"{S3_PREFIX}/partition_date={date_str}/readings.parquet"
 
 
 # ── Write ─────────────────────────────────────────────────────────────────────
@@ -70,10 +70,10 @@ def upsert_readings(df: pd.DataFrame):
 
     # Partition by date only (Date column is now a full timestamp e.g. "2026-04-21 14:00")
     df = df.copy()
-    df["_partition_date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
+    df["partition_date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
 
-    for date_str, day_df in df.groupby("_partition_date"):
-        day_df = day_df.drop(columns=["_partition_date"])
+    for date_str, day_df in df.groupby("partition_date"):
+        day_df = day_df.drop(columns=["partition_date"])
         key = _s3_key(date_str)
 
         # Try to fetch existing partition
@@ -119,10 +119,10 @@ def _duckdb_conn() -> duckdb.DuckDBPyConnection:
 
 def _parquet_glob(days: int) -> str:
     """Return a glob pattern covering the last `days` days."""
-    dates = [
-        (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
-        for i in range(days)
-    ]
+    # dates = [
+    #     (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
+    #     for i in range(days)
+    # ]
     # Build a brace-expansion glob if DuckDB supports it, else use wildcard
     # Wildcard is simpler and DuckDB filters partition columns cheaply
     return f"s3://{S3_BUCKET}/{S3_PREFIX}/**/*.parquet"
@@ -145,7 +145,7 @@ def load_readings(days: int = 30) -> pd.DataFrame:
                     latitude,
                     longitude
             FROM    read_parquet('{glob}', hive_partitioning = true)
-            WHERE   date >= '{cutoff}'
+            WHERE   partition_date >= '{cutoff}'
             ORDER BY date ASC
         """).df()
         con.close()
