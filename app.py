@@ -312,18 +312,6 @@ def update_dashboard(n_intervals, view):
     # ── Map figure ────────────────────────────────────────────────────────
     if view == "history":
         df = load_readings(days=30)
-
-        # collapse to daily average per station
-        df["Date"] = pd.to_datetime(df["Date"]).dt.date
-        df = (
-            df.groupby(["Date", "name", "sensor_id"], as_index=False)
-            .agg({
-                "PM2.5": "mean",
-                "latitude": "first",
-                "longitude": "first",
-            })
-        )
-
         fig = build_historical_map(df)
         latest_df = load_latest_readings()
 
