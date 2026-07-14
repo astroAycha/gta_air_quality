@@ -7,6 +7,7 @@ Run:
 
 import logging
 from datetime import datetime
+import pandas as pd
 from zoneinfo import ZoneInfo
 
 TORONTO_TZ = ZoneInfo("America/Toronto")
@@ -282,17 +283,56 @@ app.layout = dbc.Container(
     Input("view-toggle",       "value"),
 )
 def update_dashboard(n_intervals, view):
+    def stat_row(label, val, extra=None):
+        return html.Div([
+            html.P(label, style={
+                "fontFamily": "'Space Mono', monospace",
+                "fontSize": "0.58rem",
+                "letterSpacing": "0.18em",
+                "color": "#4a6a7a",
+                "marginBottom": "2px",
+            }),
+            html.Div([
+                html.Span(f"{val:.1f} µg/m³", style={
+                    "fontFamily": "'DM Sans', sans-serif",
+                    "fontSize": "1.1rem",
+                    "color": "#e8e0d4",
+                    "marginRight": "8px",
+                }),
+                make_aqi_badge(val),
+            ]),
+            html.P(extra, style={
+                "fontFamily": "'DM Sans', sans-serif",
+                "fontSize": "0.72rem",
+                "color": "#5a7a8a",
+                "marginTop": "2px",
+            }) if extra else None,
+        ], style={**METRIC_CARD, "marginBottom": "0.6rem"})
+
     # ── Map figure ────────────────────────────────────────────────────────
-    if view == "latest":
-        df = load_latest_readings()
-        fig = build_latest_map(df)
-    else:
+    if view == "history":
         df = load_readings(days=30)
+
+        # collapse to daily average per station
+        df["Date"] = pd.to_datetime(df["Date"]).dt.date
+        df = (
+            df.groupby(["Date", "name", "sensor_id"], as_index=False)
+            .agg({
+                "PM2.5": "mean",
+                "latitude": "first",
+                "longitude": "first",
+            })
+        )
+
         fig = build_historical_map(df)
+        latest_df = load_latest_readings()
+
+    else:  # "latest"
+        latest_df = load_latest_readings()
+        df = latest_df
+        fig = build_latest_map(df)
 
     # ── Summary cards ─────────────────────────────────────────────────────
-    latest_df = load_latest_readings()
-
     if latest_df.empty:
         cards = html.P("Fetching data …",
                        style={"color": "#4a6a7a", "fontSize": "0.85rem"})
@@ -301,32 +341,6 @@ def update_dashboard(n_intervals, view):
         worst = latest_df.loc[latest_df["PM2.5"].idxmax()]
         best  = latest_df.loc[latest_df["PM2.5"].idxmin()]
         n     = len(latest_df)
-
-        def stat_row(label, val, extra=None):
-            return html.Div([
-                html.P(label, style={
-                    "fontFamily": "'Space Mono', monospace",
-                    "fontSize": "0.58rem",
-                    "letterSpacing": "0.18em",
-                    "color": "#4a6a7a",
-                    "marginBottom": "2px",
-                }),
-                html.Div([
-                    html.Span(f"{val:.1f} µg/m³", style={
-                        "fontFamily": "'DM Sans', sans-serif",
-                        "fontSize": "1.1rem",
-                        "color": "#e8e0d4",
-                        "marginRight": "8px",
-                    }),
-                    make_aqi_badge(val),
-                ]),
-                html.P(extra, style={
-                    "fontFamily": "'DM Sans', sans-serif",
-                    "fontSize": "0.72rem",
-                    "color": "#5a7a8a",
-                    "marginTop": "2px",
-                }) if extra else None,
-            ], style={**METRIC_CARD, "marginBottom": "0.6rem"})
 
         cards = html.Div([
             stat_row("NETWORK AVERAGE", avg, f"{n} active sensors"),
