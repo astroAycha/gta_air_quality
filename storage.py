@@ -2,8 +2,8 @@
 storage.py — Read/write PM2.5 readings as date-partitioned Parquet on S3.
 
 Layout on S3:
-    s3://<BUCKET>/readings/date=2026-04-20/readings.parquet
-    s3://<BUCKET>/readings/date=2026-04-21/readings.parquet
+    s3://<BUCKET>/readings/partition_date=2026-04-20/readings.parquet
+    s3://<BUCKET>/readings/partition_date=2026-04-21/readings.parquet
     ...
 
 Reading is done with DuckDB's native S3 extension — no local copy needed.
@@ -119,12 +119,7 @@ def _duckdb_conn() -> duckdb.DuckDBPyConnection:
 
 def _parquet_glob(days: int) -> str:
     """Return a glob pattern covering the last `days` days."""
-    # dates = [
-    #     (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
-    #     for i in range(days)
-    # ]
-    # Build a brace-expansion glob if DuckDB supports it, else use wildcard
-    # Wildcard is simpler and DuckDB filters partition columns cheaply
+
     return f"s3://{S3_BUCKET}/{S3_PREFIX}/**/*.parquet"
 
 
