@@ -6,8 +6,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-TORONTO_LAT = 43.70
-TORONTO_LON = -79.385
+MAP_CENTER_LAT = 43.5890
+MAP_CENTER_LON = -79.385
 
 MAPBOX_STYLE = "carto-positron"
 DEFAULT_ZOOM = 9
@@ -78,11 +78,11 @@ def build_latest_map(df: pd.DataFrame) -> go.Figure:
         size=_size_col(df["PM2.5"]),
         color_continuous_scale=AQI_COLORSCALE,
         range_color=[AQI_MIN, AQI_MAX],
-        center={"lat": TORONTO_LAT, "lon": TORONTO_LON},
+        center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
         hover_name="name",
-        hover_data={"PM2.5": ":.1f", "Date": True, "_size": False,
+        hover_data={"PM2.5": ":.1f", "Date": True, "size": False,
                     "latitude": False, "longitude": False},
         title="Latest PM2.5 Readings",
     )
@@ -116,7 +116,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         animation_frame="Date",
         color_continuous_scale=AQI_COLORSCALE,
         range_color=[AQI_MIN, AQI_MAX],
-        center={"lat": TORONTO_LAT, "lon": TORONTO_LON},
+        center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
         hover_name="name",
@@ -139,7 +139,7 @@ def _empty_figure(message: str) -> go.Figure:
     fig.update_layout(
         mapbox=dict(
             style=MAPBOX_STYLE,
-            center={"lat": TORONTO_LAT, "lon": TORONTO_LON},
+            center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
             zoom=DEFAULT_ZOOM,
         ),
         margin=dict(l=0, r=0, t=0, b=0),
