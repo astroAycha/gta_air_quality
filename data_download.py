@@ -1,5 +1,7 @@
 import requests
 from requests.exceptions import ConnectionError, HTTPError
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import os
 import logging
 import pandas as pd
@@ -29,6 +31,20 @@ class DataDownload():
     def __init__(self):
         self.api_key = os.getenv('OPENAQ_API_KEY')
         self.headers = {'X-API-Key': self.api_key}
+        self.session = self._make_session()
+
+    @staticmethod
+    def _make_session() -> requests.Session:
+        session = requests.Session()
+        retries = Retry(
+            total=5,
+            backoff_factor=2,
+            status_forcelist=[429, 500, 502, 503, 504],
+            respect_retry_after_header=True,
+            allowed_methods=["GET"],
+        )
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+        return session
 
     def find_sensors(self,
                      lat: float,
@@ -58,8 +74,12 @@ class DataDownload():
             "limit": 1000
         }
 
-        response = requests.get(url, params=params, headers=self.headers)
-        response.raise_for_status()
+        try:
+            response = self.session.get(url, params=params, headers=self.headers)
+            response.raise_for_status()
+        except (ConnectionError, HTTPError) as e:
+            logging.error(f"Error fetching sensor locations: {e}")
+            return pd.DataFrame()
 
         data = response.json()
         results_df = pd.json_normalize(data['results'])
@@ -99,7 +119,7 @@ class DataDownload():
             }
 
             try:
-                response = requests.get(url=data_url,
+                response = self.session.get(url=data_url,
                                         params=params,
                                         headers=self.headers)
                 response.raise_for_status()
