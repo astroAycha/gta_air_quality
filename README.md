@@ -12,6 +12,6 @@ This project focuses on analyzing and visualizing PM2.5 air pollution data in th
 
 
 
-[Check out the interactive dashboard on Hugging Face Spaces](https://huggingface.co/spaces/astroAycha/gta-air-quality)
+[Check out the interactive dashboard:](https://aychatammour.com/gta_air_quality_dashboard.html)
 
 ![GTA air quality monitoring dashboard](dashboard_screenshot.png)
