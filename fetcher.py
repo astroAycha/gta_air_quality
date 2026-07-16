@@ -24,11 +24,13 @@ logging.basicConfig(
 
 # OpenAQ max radius is 25,000m — use multiple centres to cover the GTA
 SEARCH_CENTRES = [
-    (43.6532, -79.3832, "Toronto"),       # downtown Toronto
-    (43.5890, -79.6441, "Mississauga"),   # Mississauga centre
-    (43.8634, -79.0296, "Ajax"),
-    (43.4028, -80.3209, "Cambridge"),  # Cambridge centre
-    (43.1300, -80.7468, "Woodstck") # 
+    (43.6532, -79.3832, "Toronto"), # downtown Toronto
+    (43.5890, -79.6441, "Mississauga"),
+    (43.8634, -79.0296, "Ajax"), 
+    (43.4028, -80.3209, "Cambridge"), 
+    (43.1300, -80.7468, "Woodstck"),
+    (43.1374, -80.2663, "Brantford"),
+    (42.9889, -81.2427, "London"),
 ]
 RADIUS = 25000   # metres — OpenAQ maximum
 
