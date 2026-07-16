@@ -82,7 +82,7 @@ def build_latest_map(df: pd.DataFrame) -> go.Figure:
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
         hover_name="name",
-        hover_data={"PM2.5": ":.1f", "Date": True, "size": False,
+        hover_data={"PM2.5": ":.1f", "Date": True, #"size": False,
                     "latitude": False, "longitude": False},
         title="Latest PM2.5 Readings",
     )
