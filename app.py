@@ -101,6 +101,32 @@ app.layout = dbc.Container(
     style={"background": "#080d13", "minHeight": "100vh", "padding": 0},
     children=[
 
+                html.Style(
+                        """
+                        .app-shell { overflow-x: hidden; }
+                        .sidebar-col { position: relative; z-index: 2; }
+                        .map-col { z-index: 1; }
+                        @media (max-width: 991.98px) {
+                            .dashboard-row {
+                                min-height: auto !important;
+                                flex-direction: column !important;
+                            }
+                            .map-col { order: -1 !important; }
+                            .sidebar-col { order: 1 !important; }
+                            .sidebar-col { border-right: none !important; border-bottom: 1px solid #1e2a38; }
+                            .sidebar-col > div { min-height: auto !important; padding: 1.25rem 1rem !important; gap: 1rem !important; }
+                            .air-quality-map { height: 68vh !important; min-height: 380px; }
+                        }
+                        @media (max-width: 575.98px) {
+                            .sidebar-col > div { padding: 1rem 0.85rem !important; }
+                            .sidebar-col h1 { font-size: 1.35rem !important; }
+                            .sidebar-col p, .sidebar-col label, .sidebar-col span, .sidebar-col a { font-size: 0.9rem !important; line-height: 1.35; }
+                            .sidebar-col input[type="radio"] { transform: scale(1.1); }
+                            .air-quality-map { height: 62vh !important; min-height: 320px; }
+                        }
+                        """
+                ),
+
         # ── Auto-refresh interval (every 60 min) ─────────────────────────
         dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),
 
