@@ -120,7 +120,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
         hover_name="name",
-        hover_data={"PM2.5": ":.1f", "_size": False,
+        hover_data={"PM2.5": ":.1f",
                     "latitude": False, "longitude": False},
         title="PM2.5 History (30 days)",
     )
