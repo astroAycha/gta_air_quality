@@ -10,7 +10,7 @@ MAP_CENTER_LAT = 43.1392
 MAP_CENTER_LON = -80.2702
 
 MAPBOX_STYLE = "carto-positron"
-DEFAULT_ZOOM = 9
+DEFAULT_ZOOM = 6
 
 # Fixed AQI bounds matching EPA breakpoints
 AQI_MIN = 0.0
