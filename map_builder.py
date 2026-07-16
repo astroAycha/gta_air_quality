@@ -6,8 +6,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-MAP_CENTER_LAT = 43.5890
-MAP_CENTER_LON = -79.385
+MAP_CENTER_LAT = 43.6997
+MAP_CENTER_LON = -79.9510
 
 MAPBOX_STYLE = "carto-positron"
 DEFAULT_ZOOM = 9
