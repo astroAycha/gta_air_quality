@@ -70,23 +70,30 @@ def build_latest_map(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty_figure("No data available yet — first fetch in progress.")
 
+    df = df.copy()
+    df["_marker_size"] = _size_col(df["PM2.5"])
+
     fig = px.scatter_mapbox(
         df,
         lat="latitude",
         lon="longitude",
         color="PM2.5",
-        size=_size_col(df["PM2.5"]),
+        size="_marker_size",
         color_continuous_scale=AQI_COLORSCALE,
         range_color=[AQI_MIN, AQI_MAX],
         center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
         zoom=DEFAULT_ZOOM,
         mapbox_style=MAPBOX_STYLE,
         hover_name="name",
-        hover_data={"PM2.5": ":.1f", "Date": True, #"size": False,
-                    "latitude": False, "longitude": False},
+        hover_data={
+            "PM2.5": ":.1f",
+            "Date": True,
+            "_marker_size": False,
+            "latitude": False,
+            "longitude": False,
+        },
         title="Latest PM2.5 Readings",
     )
-
     return _common_layout(fig)
 
 
