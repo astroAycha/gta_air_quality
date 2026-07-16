@@ -26,7 +26,8 @@ logging.basicConfig(
 SEARCH_CENTRES = [
     (43.6532, -79.3832, "Toronto"),       # downtown Toronto
     (43.5890, -79.6441, "Mississauga"),   # Mississauga centre
-    (43.8634, -79.0296, "Ajax")
+    (43.8634, -79.0296, "Ajax"),
+    (43.4028, -80.3209, "Cambridge"),  # Cambridge centre
 ]
 RADIUS = 25000   # metres — OpenAQ maximum
 
