@@ -96,6 +96,7 @@ def make_aqi_badge(value: float) -> html.Span:
 
 app.layout = dbc.Container(
     fluid=True,
+    className="app-shell",
     style={"background": "#080d13", "minHeight": "100vh", "padding": 0},
     children=[
 
@@ -103,12 +104,16 @@ app.layout = dbc.Container(
         dcc.Interval(id="interval", interval=60 * 60 * 1000, n_intervals=0),
 
         dbc.Row(
+            className="dashboard-row",
             style={"margin": 0, "minHeight": "100vh"},
             children=[
 
                 # ── Sidebar ───────────────────────────────────────────────
                 dbc.Col(
-                    width=3,
+                    xs=12,
+                    lg=3,
+                    xxl=2,
+                    className="sidebar-col",
                     style=SIDEBAR_STYLE,
                     children=[
 
@@ -257,11 +262,15 @@ app.layout = dbc.Container(
 
                 # ── Map panel ─────────────────────────────────────────────
                 dbc.Col(
-                    width=9,
+                    xs=12,
+                    lg=9,
+                    xxl=10,
+                    className="map-col",
                     style={"padding": 0, "position": "relative"},
                     children=[
                         dcc.Graph(
                             id="air-quality-map",
+                            className="air-quality-map",
                             style={"height": "100vh"},
                             config={"displayModeBar": True, "scrollZoom": True},
                         ),
@@ -312,18 +321,6 @@ def update_dashboard(n_intervals, view):
     # ── Map figure ────────────────────────────────────────────────────────
     if view == "history":
         df = load_readings(days=30)
-
-        # collapse to daily average per station
-        df["Date"] = pd.to_datetime(df["Date"]).dt.date
-        df = (
-            df.groupby(["Date", "name", "sensor_id"], as_index=False)
-            .agg({
-                "PM2.5": "mean",
-                "latitude": "first",
-                "longitude": "first",
-            })
-        )
-
         fig = build_historical_map(df)
         latest_df = load_latest_readings()
 

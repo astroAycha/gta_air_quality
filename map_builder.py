@@ -97,7 +97,9 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
     if df.empty:
         return _empty_figure("No historical data available yet.")
 
-    # Aggregate: one value per (date, sensor) — mean in case of duplicates
+    df = df.copy()
+    df['Date'] = pd.to_datetime(df['Date']).dt.date  # Strip time for grouping
+    # Aggregate: one value per (date, sensor)
     agg = (
         df.groupby(["Date", "name", "sensor_id", "latitude", "longitude"], as_index=False)
         ["PM2.5"].mean()
