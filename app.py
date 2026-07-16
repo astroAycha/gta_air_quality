@@ -38,6 +38,7 @@ app = dash.Dash(
         dbc.themes.CYBORG,
         "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap",
     ],
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     title="GTA Air Quality",
     update_title=None,
 )
