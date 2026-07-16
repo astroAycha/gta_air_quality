@@ -28,6 +28,7 @@ SEARCH_CENTRES = [
     (43.5890, -79.6441, "Mississauga"),   # Mississauga centre
     (43.8634, -79.0296, "Ajax"),
     (43.4028, -80.3209, "Cambridge"),  # Cambridge centre
+    (43.1300, -80.7468, "Woodstck") # 
 ]
 RADIUS = 25000   # metres — OpenAQ maximum
 
