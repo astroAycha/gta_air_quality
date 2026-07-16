@@ -12,6 +12,7 @@ the OpenAQ API has a maximum radius of 25km.
 import logging
 import os
 import sys
+import time
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -91,6 +92,8 @@ def main():
         else:
             logging.info(f"{label}: {len(df)} rows, {df['sensor_id'].nunique()} sensors")
             all_dfs.append(df)
+        
+        time.sleep(2)  # space out requests between search centres
 
     if not all_dfs:
         logging.warning("No data returned from any search centre.")

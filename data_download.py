@@ -1,3 +1,5 @@
+import time
+
 import requests
 from requests.exceptions import ConnectionError, HTTPError
 from requests.adapters import HTTPAdapter
@@ -198,6 +200,8 @@ class DataDownload():
                     data['latitude'] = s_lat
                     data['longitude'] = s_lon
                     df_list.append(data)
+
+                    time.sleep(1)  # space out per-sensor requests
 
         if not df_list:
             return pd.DataFrame()
