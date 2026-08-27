@@ -5,6 +5,12 @@ map_builder.py — Builds Plotly scatter-mapbox figures from a readings DataFram
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+CARTO_API_KEY = os.getenv("CARTO_MAP_API_KEY")
+
 
 MAP_CENTER_LAT = 43.1392
 MAP_CENTER_LON = -80.2702
@@ -42,24 +48,28 @@ def _size_col(series: pd.Series) -> pd.Series:
     return (series - AQI_MIN + 1).clip(lower=1)
 
 
+
+CARTO_TILE_URL = (
+    f"https://basemaps.cartocdn.com/rastertiles/light_all/{{z}}/{{x}}/{{y}}.png?key={CARTO_API_KEY}"
+)
+
+
 def _common_layout(fig: go.Figure) -> go.Figure:
     fig.update_layout(
+        mapbox_style="white-bg",  # blank canvas; real tiles come from mapbox_layers below
+        mapbox_layers=[{
+            "below": "traces",
+            "sourcetype": "raster",
+            "sourceattribution": "© OpenStreetMap contributors © CARTO",
+            "source": [CARTO_TILE_URL],
+        }],
         margin=dict(l=0, r=0, t=36, b=0),
-        coloraxis_colorbar=dict(
-            title="PM2.5<br>(µg/m³)",
-            thickness=14,
-            len=0.6,
-        ),
+        coloraxis_colorbar=dict(title="PM2.5<br>(µg/m³)", thickness=14, len=0.6),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(family="'DM Sans', sans-serif", color="#e8e0d4"),
     )
-    # Always pin to fixed AQI range so colours match the legend
-    fig.update_coloraxes(
-        cmin=AQI_MIN,
-        cmax=AQI_MAX,
-        colorscale=AQI_COLORSCALE,
-    )
+    fig.update_coloraxes(cmin=AQI_MIN, cmax=AQI_MAX, colorscale=AQI_COLORSCALE)
     return fig
 
 
@@ -83,7 +93,7 @@ def build_latest_map(df: pd.DataFrame) -> go.Figure:
         range_color=[AQI_MIN, AQI_MAX],
         center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
         zoom=DEFAULT_ZOOM,
-        mapbox_style=MAPBOX_STYLE,
+        mapbox_style="white-bg",
         hover_name="name",
         hover_data={
             "PM2.5": ":.1f",
@@ -125,7 +135,7 @@ def build_historical_map(df: pd.DataFrame) -> go.Figure:
         range_color=[AQI_MIN, AQI_MAX],
         center={"lat": MAP_CENTER_LAT, "lon": MAP_CENTER_LON},
         zoom=DEFAULT_ZOOM,
-        mapbox_style=MAPBOX_STYLE,
+        mapbox_style="white-bg",
         hover_name="name",
         hover_data={"PM2.5": ":.1f", "_size": False,
                     "latitude": False, "longitude": False},

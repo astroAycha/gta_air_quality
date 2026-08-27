@@ -131,7 +131,7 @@ app.layout = dbc.Container(
                                 }
                             ),
                             html.H1(
-                                "Greater Toronto",
+                                "Greater Toronto Area (GTA)",
                                 style={
                                     "fontFamily": "'DM Sans', sans-serif",
                                     "fontWeight": 300,
