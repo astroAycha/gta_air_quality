@@ -11,12 +11,13 @@ import os
 load_dotenv()
 CARTO_API_KEY = os.getenv("CARTO_MAP_API_KEY")
 
-
-MAP_CENTER_LAT = 43.1392
-MAP_CENTER_LON = -80.2702
+# map centre
+# 43.57144764672914, -79.6790531466714
+MAP_CENTER_LAT = 43.572
+MAP_CENTER_LON = -79.679
 
 MAPBOX_STYLE = "carto-positron"
-DEFAULT_ZOOM = 8
+DEFAULT_ZOOM = 9
 
 # Fixed AQI bounds matching EPA breakpoints
 AQI_MIN = 0.0
